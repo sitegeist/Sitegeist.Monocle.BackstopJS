@@ -1,0 +1,20 @@
+{
+    "description": "BackstopJS Connector for Sitegeist.Monocle",
+    "type": "neos-plugin",
+    "name": "sitegeist/monocle-backstopjs",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "neos/flow": "*",
+        "sitegeist/monocle": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sitegeist\\Monocle\\BackstopJS\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Sitegeist.Monocle.BackstopJS"
+        }
+    }
+}

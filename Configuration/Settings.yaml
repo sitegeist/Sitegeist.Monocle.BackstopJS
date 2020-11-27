@@ -1,0 +1,64 @@
+Sitegeist:
+  Monocle:
+    BackstopJS:
+
+      paths:
+        bitmaps_reference: backstop_data/bitmaps_reference
+        bitmaps_test: backstop_data/bitmaps_test
+        engine_scripts: backstop_data/engine_scripts
+        html_report: backstop_data/html_report
+        ci_report: backstop_data/ci_report
+
+      # template for the generated backstop.json file
+      # the keys 'id','viewports','scenarios' and 'pathes' are
+      # replaced by the backstop:configuration command
+      # all other keys can be adjusted as needed
+      configurationTemplate:
+
+        # PackageKey of the site-package
+        id: null
+        # Scenario configuration, created from the styleguide prototypes
+        scenarios: null
+        # Viewport configuration, created from the configured monocle viewports
+        viewports: null
+
+        onBeforeScript: ''
+        onReadyScript: ''
+        paths:
+          bitmaps_reference: backstop_data/bitmaps_reference
+          bitmaps_test: backstop_data/bitmaps_test
+          engine_scripts: backstop_data/engine_scripts
+          html_report: backstop_data/html_report
+          ci_report: backstop_data/ci_report
+        report:
+          - browser
+        engine: puppeteer
+        engineOptions:
+          args:
+            - '--no-sandbox'
+        asyncCaptureLimit: 5
+        asyncCompareLimit: 50
+        debug: false
+        debugWindow: false
+
+      # template for
+      scenarioTemplate:
+        # Replaced with prototype name or styleguide title
+        label: null
+        # Replaced with prototype preview url
+        url: null
+        cookiePath: ''
+        referenceUrl: ''
+        readyEvent: ''
+        readySelector: ''
+        delay: 0
+        hideSelectors: { }
+        removeSelectors: { }
+        hoverSelector: ''
+        clickSelector: ''
+        postInteractionWait: 0
+        selectors: { }
+        selectorExpansion: true
+        expect: 0
+        misMatchThreshold: 0.1
+        requireSameDimensions: true
