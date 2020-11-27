@@ -2,10 +2,19 @@ Sitegeist:
   Monocle:
     BackstopJS:
 
+      # if enabled only prototypes that have @styleguide.options.backstop.default = true will
+      # be included, by default all prototypes from the styleguide are included
+      defaultOptIn: false
+
+      # if enabled only propSets from prototypes that have @styleguide.options.backstop.propSets = true
+      # will be included, by default all propSets from the styleguide are included
+      propSetOptIn: false
+
       # template for the generated backstop.json file
       # the keys 'id','viewports','scenarios' and 'pathes' are
       # replaced by the backstop:configuration command
       # all other keys can be adjusted as needed
+      # See: https://github.com/garris/BackstopJS/blob/master/README.md
       configurationTemplate:
         # PackageKey of the site-package
         id: null
@@ -13,7 +22,9 @@ Sitegeist:
         scenarios: null
         # Viewport configuration, created from the configured monocle viewports
         viewports: null
-        # The pathes are adjusted for flow
+        # The pathes are adjusted for flow, references and engine scripts are in
+        # Test/BackstopJS which should be under version control  while results
+        # and reports are only temporary
         paths:
           bitmaps_reference: '%FLOW_PATH_ROOT%Test/BackstopJS/References'
           engine_scripts: '%FLOW_PATH_ROOT%Test/BackstopJS/EngineScripts'
@@ -33,7 +44,9 @@ Sitegeist:
         debug: false
         debugWindow: false
 
-      # template for
+      # template for each scenario, the keys 'label' and 'url' are replaced
+      # by the backstop:configuration command, everything else can be adjusted as needed
+      # See: https://github.com/garris/BackstopJS/blob/master/README.md#advanced-scenarios
       scenarioTemplate:
         # Replaced with prototype name or styleguide title
         label: null
