@@ -117,12 +117,13 @@ class BackstopCommandController extends CommandController
     {
         // mock action request and enable rewriteurl to render
         $httpRequest = new ServerRequest('get', new Uri($baseUri));
-        $actionRequest = new ActionRequest($httpRequest);
+        $actionRequest = ActionRequest::fromHttpRequest($httpRequest);
         putenv('FLOW_REWRITEURLS=1');
 
         // prepare uri builder
         $this->uriBuilder->reset();
         $this->uriBuilder->setRequest($actionRequest);
+        $this->uriBuilder->setFormat('html');
         $this->uriBuilder->setCreateAbsoluteUri(true);
     }
 
