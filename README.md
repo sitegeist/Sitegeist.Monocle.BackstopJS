@@ -98,7 +98,7 @@ _If the `--docker` option is used make sure to call the `./flow backstop:configu
 reolved from the docker container like in the example below._
 
 ```
-./flow backstop:configuration --base-uri https://docker.for.mac.host.internal > backstop.json && backstop test --config=backstop.json --docker
+./flow backstop:configuration --base-uri http://host.docker.internal > backstop.json && backstop test --config=backstop.json --docker
 ```
 
 ## Contribution

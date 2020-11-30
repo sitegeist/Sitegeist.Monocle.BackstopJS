@@ -26,11 +26,11 @@ Sitegeist:
         # Test/BackstopJS which should be under version control  while results
         # and reports are only temporary
         paths:
-          bitmaps_reference: '%FLOW_PATH_ROOT%Test/BackstopJS/References'
-          engine_scripts: '%FLOW_PATH_ROOT%Test/BackstopJS/EngineScripts'
-          bitmaps_test: '%FLOW_PATH_TEMPORARY%BackstopJS/Test'
-          html_report: '%FLOW_PATH_TEMPORARY%BackstopJS/HtmlReport'
-          ci_report: '%FLOW_PATH_TEMPORARY%BackstopJS/CiReport'
+          bitmaps_reference: 'Test/BackstopJS/References'
+          engine_scripts: 'Test/BackstopJS/EngineScripts'
+          bitmaps_test: 'Data/Temporary/BackstopJS/Test'
+          html_report: 'Data/Temporary/BackstopJS/HtmlReport'
+          ci_report: 'Data/Temporary/BackstopJS/CiReport'
         onBeforeScript: ''
         onReadyScript: ''
         report:
