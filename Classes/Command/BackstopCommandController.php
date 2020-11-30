@@ -63,7 +63,7 @@ class BackstopCommandController extends CommandController
     /**
      * Generate a backstopJS configuration file for the given site-package and baseUri
      *
-     * @param string|null $baseUri the base uri, if empty a local flow:server run is assumed
+     * @param string|null $baseUri the base uri, if empty `http://127.0.0.1:8081` is assumed
      * @param string|null $packageKey the site-package, if empty the default site package is used
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException

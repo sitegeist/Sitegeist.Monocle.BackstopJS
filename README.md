@@ -18,7 +18,7 @@ We use semantic-versioning so every breaking change will increase the major-vers
 
 ## Basic Tutorial 
 
-1. Install BackstopJS: `npm install -g backstopjs`
+1. Install BackstopJS: `npm install -g backstopjs` or install BackstopJS as dev depencency of your project
 2. Sitegeist.Monocle.BackstopJS: `composer require sitegeist/monocle-backstopjs`
 2. Create BackstopJS Configuration: `./flow backstop:configuration --package-key Vendor.Site  --base-uri http://127.0.0.1:8081 > custom-backstop.json` 
 3. Start Flow webserver: `./flow server:run`
@@ -35,10 +35,8 @@ USAGE:
   ./flow backstop:configuration [<options>]
 
 OPTIONS:
-  --base-uri           the base uri, if empty a local flow:server run is
-                       assumed
-  --package-key        the site-package, if empty the default site package is
-                       used
+  --base-uri           the base uri, if empty `http://127.0.0.1:8081` is assumed
+  --package-key        the site-package, if empty the default site package is used
 ```
 
 ## Configuration
@@ -89,6 +87,18 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
         }
     }
 }
+```
+### Avoiding cross platform rendering inconsistencies
+
+Since the rendering especially of fonts has slight deviations between different operation systems it is important
+to run the tests always in a very similar environment to avoid false errors. BackstopJS come with a `--docker` option
+that will execute all tests using a docker container running headless chrome on linux. 
+
+_If the `--docker` option is used make sure to call the `./flow backstop:configuration` command with a `--base-uri` that can be 
+reolved from the docker container like in the example below._
+
+```
+./flow backstop:configuration --base-uri https://docker.for.mac.host.internal > backstop.json && backstop test --config=backstop.json --docker
 ```
 
 ## Contribution
