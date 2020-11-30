@@ -27,7 +27,7 @@ Sitegeist:
         # and reports are only temporary
         paths:
           bitmaps_reference: 'Test/BackstopJS/References'
-          engine_scripts: 'Test/BackstopJS/EngineScripts'
+          engine_scripts: 'Test/BackstopJS/Scripts'
           bitmaps_test: 'Data/Temporary/BackstopJS/Test'
           html_report: 'Data/Temporary/BackstopJS/HtmlReport'
           ci_report: 'Data/Temporary/BackstopJS/CiReport'
@@ -35,6 +35,8 @@ Sitegeist:
         onReadyScript: ''
         report:
           - browser
+          - CI
+          - json
         engine: puppeteer
         engineOptions:
           args:

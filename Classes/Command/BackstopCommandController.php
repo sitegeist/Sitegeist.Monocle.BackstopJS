@@ -94,12 +94,15 @@ class BackstopCommandController extends CommandController
         $viewportPresets = $this->configurationService->getSiteConfiguration($sitePackageKey, 'ui.viewportPresets');
         $viewportConfigurations = [];
         foreach ($viewportPresets as $viewportName => $viewportConfiguration) {
-            $viewport = [
-                'label' => $viewportConfiguration['label'],
-                'width' => $viewportConfiguration['width'],
-                'height' => $viewportConfiguration['height']
-            ];
-            $viewportConfigurations[] = $viewport;
+            if ($viewportConfiguration['width'] && $viewportConfiguration['height']) {
+                $viewport = [
+                    'label' => $viewportConfiguration['label'],
+                    'width' => $viewportConfiguration['width'],
+                    'height' => $viewportConfiguration['height']
+                ];
+                $viewportConfigurations[] = $viewport;
+            }
+
         }
 
         $backstopJsConfiguration = $this->configurationTemplate;
