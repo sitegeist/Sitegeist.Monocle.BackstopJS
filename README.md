@@ -79,15 +79,32 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
             backstop {
                 # enable or disable proptype the default depends on
                 # the `itemOptIn` setting
-                enabled = true
+                default = true
                 # enable or disable the propSet inclusion, the default
                 # depends on `propSetOptIn` settings   
                 propSets = true
+                # configure scenario settings for all propSets 
+                scenario {
+                  delay = 2000
+                  hoverSelector = '.button'
+                }
+
+                #  
+                propSet {
+                  foo.scenario.delay = 5000  
+                }
             }
         }
     }
 }
 ```
+### Advanced scenarios 
+
+BackstopJS offers quite a bit of settings to adjust specific scenarios which is documented here https://github.com/garris/BackstopJS#advanced-scenarios. 
+While the general scenario template can be adjusted via Settings.yaml the scenario configuration of each prototyoe can
+be adjusted by the fusion  annotations `@styleguide.options.backstop.scenario`. All keys define here there will override 
+the the generated scenario.   
+
 ### Avoiding cross platform rendering inconsistencies
 
 Since the rendering especially of fonts has slight deviations between different operation systems it is important
@@ -100,6 +117,8 @@ reolved from the docker container like in the example below._
 ```
 ./flow backstop:configuration --base-uri http://host.docker.internal > backstop.json && backstop test --config=backstop.json --docker
 ```
+
+- When using ./flow server run use http instead of https
 
 ## Contribution
 

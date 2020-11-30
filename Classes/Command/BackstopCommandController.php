@@ -13,6 +13,7 @@ use Sitegeist\Monocle\Service\PackageKeyTrait;
 use Sitegeist\Monocle\Fusion\FusionService;
 use Sitegeist\Monocle\Service\ConfigurationService;
 use Neos\Flow\Mvc\Routing\UriBuilder;
+use Neos\Utility\Arrays;
 
 class BackstopCommandController extends CommandController
 {
@@ -81,11 +82,11 @@ class BackstopCommandController extends CommandController
             $enableDefault = $styleguideInformations['options']['backstop']['default'] ?? !$this->defaultOptIn;
             $enablePropSets = $styleguideInformations['options']['backstop']['propSets'] ?? !$this->propSetOptIn;
             if ($enableDefault) {
-                $scenarioConfigurations[] = $this->prepareScenario($sitePackageKey, $prototypeName);
+                $scenarioConfigurations[] = $this->prepareScenario($sitePackageKey, $prototypeName, $styleguideInformations);
             }
             if ($styleguideInformations['propSets'] && $enablePropSets) {
                 foreach ($styleguideInformations['propSets'] as $propSet) {
-                    $scenarioConfigurations[] = $this->prepareScenario($sitePackageKey, $prototypeName, $propSet);
+                    $scenarioConfigurations[] = $this->prepareScenario($sitePackageKey, $prototypeName, $styleguideInformations, $propSet);
                 }
             }
         }
@@ -102,7 +103,7 @@ class BackstopCommandController extends CommandController
         }
 
         $backstopJsConfiguration = $this->configurationTemplate;
-        $backstopJsConfiguration['id'] = $sitePackageKey;
+        $backstopJsConfiguration['id'] = str_replace('.', '_', $sitePackageKey);
         $backstopJsConfiguration['scenarios'] = $scenarioConfigurations;
         $backstopJsConfiguration['viewports'] = $viewportConfigurations;
 
@@ -128,15 +129,17 @@ class BackstopCommandController extends CommandController
     /**
      * @param string|null $sitePackageKey
      * @param string $prototypeName
+     * @param array $styleguideInformations
      * @param string $propSet
      * @return array
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
      */
-    protected function prepareScenario(?string $sitePackageKey, string $prototypeName, ?string $propSet = null): array
+    protected function prepareScenario(?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null): array
     {
         $propSetScenario = $this->scenarioTemplate;
-        $propSetScenario['label'] = $prototypeName . ':' . $propSet;
+        $label = $prototypeName . ($propSet ? ':' . $propSet : '' );
+        $propSetScenario['label'] = str_replace(['.', ':'], '_', $label);
         $propSetScenario['url'] = $this->uriBuilder->uriFor(
             'index',
             [
@@ -147,6 +150,11 @@ class BackstopCommandController extends CommandController
             'preview',
             'Sitegeist.Monocle'
         );
+
+        $scenarioConfiguration = $styleguideInformations['options']['backstop']['scenario'] ?? null;
+        if ($scenarioConfiguration && is_array($scenarioConfiguration)) {
+            $propSetScenario = Arrays::arrayMergeRecursiveOverrule($propSetScenario, $scenarioConfiguration);
+        }
         return $propSetScenario;
     }
 
