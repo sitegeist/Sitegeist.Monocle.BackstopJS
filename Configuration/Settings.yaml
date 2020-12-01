@@ -22,21 +22,19 @@ Sitegeist:
         scenarios: null
         # Viewport configuration, created from the configured monocle viewports
         viewports: null
+        # Reports to generate, replaced by the --report cli argument
+        report: null
         # The pathes are adjusted for flow, references and engine scripts are in
         # Test/BackstopJS which should be under version control  while results
         # and reports are only temporary
         paths:
           bitmaps_reference: 'Test/BackstopJS/References'
-          engine_scripts: 'Test/BackstopJS/Scripts'
+          engine_scripts: 'Test/BackstopJS/EngineScripts'
           bitmaps_test: 'Data/Temporary/BackstopJS/Test'
           html_report: 'Data/Temporary/BackstopJS/HtmlReport'
           ci_report: 'Data/Temporary/BackstopJS/CiReport'
         onBeforeScript: ''
         onReadyScript: ''
-        report:
-          - browser
-          - CI
-          - json
         engine: puppeteer
         engineOptions:
           args:

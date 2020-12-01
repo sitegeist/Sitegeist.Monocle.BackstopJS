@@ -1,7 +1,8 @@
-
 # Sitegeist.Monocle.BackstopJS
-
 [BackstopJS](https://garris.github.io/BackstopJS) connector for the Sitegeist.Monocle Styleguide
+
+This packahe can create a BackstopJS configuration file for a whole Monocle styleguide to test all prototypes with all 
+propSets as scenarios in all viewports. The generated configuration and scenarios can be adjusted via setting. 
 
 ### Authors & Sponsors
 
@@ -37,6 +38,7 @@ USAGE:
 OPTIONS:
   --base-uri           the base uri, if empty `http://127.0.0.1:8081` is assumed
   --package-key        the site-package, if empty the default site package is used
+  --report             the reports to generate seperated by comma, possible keys are 'browser', 'CI' and 'json'
 ```
 
 ## Configuration
@@ -77,21 +79,19 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
     @styleguide {
         options {
             backstop {
+
                 # enable or disable proptype the default depends on
                 # the `itemOptIn` setting
                 default = true
+
                 # enable or disable the propSet inclusion, the default
                 # depends on `propSetOptIn` settings   
                 propSets = true
-                # configure scenario settings for all propSets 
+
+                # configure scenario settings 
                 scenario {
                   delay = 2000
                   hoverSelector = '.button'
-                }
-
-                #  
-                propSet {
-                  foo.scenario.delay = 5000  
                 }
             }
         }
@@ -103,9 +103,54 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
 BackstopJS offers quite a bit of settings to adjust specific scenarios which is documented here https://github.com/garris/BackstopJS#advanced-scenarios. 
 While the general scenario template can be adjusted via Settings.yaml the scenario configuration of each prototyoe can
 be adjusted by the fusion  annotations `@styleguide.options.backstop.scenario`. All keys define here there will override 
-the the generated scenario.   
+the generated scenario.   
 
-### Avoiding cross platform rendering inconsistencies
+## Common problems and solutions 
+
+### LazyLoading of Images 
+
+If the images in the project use lazy loading it is quite likely that the images are not reliably loaded before the 
+screenshot ist taken. This can be mitigated with by disabling the lazy loading in the styleguide. 
+
+```
+//
+// Set a context variable to detect the styleguide rendering 
+//
+prototype(Sitegeist.Monocle:Preview.Page) {
+    @context.disableLazyloadingInStyleguide = true
+}
+
+//
+// Disable lazy loading via loading="lazy" from Sitegeist.Kaleidoscope
+//
+prototype(Sitegeist.Kaleidoscope:Image) {
+    loading.@process.loading = ${disableLazyloadingInStyleguide ? 'eager' : value}
+}
+prototype(Sitegeist.Kaleidoscope:Picture) {
+    loading.@process.override = ${disableLazyloadingInStyleguide ? 'eager' : value}
+}
+
+//
+// Disable lazy loading via lazysizes.js from Sitegeist.Lazybones
+// 
+prototype(Sitegeist.Lazybones:Image) {
+    lazy.@process.override = ${disableLazyloadingInStyleguide ? false : value}
+}
+prototype(Sitegeist.Lazybones:Picture) {
+    lazy.@process.override = ${disableLazyloadingInStyleguide ? false : value}
+}
+```
+
+!!! We recommend to include this only in the Development Context to avoid interference with production code!!! 
+
+Alternatively you can also use the following options:
+
+1. Configure a delay in the setting `Sitegeist.Monocle.BackstopJS.scenarioTemplate.delay: 3000`
+2. Configure a delay for specific prototypes `@styleguide.options.backstop.scenario.delay = 3000`
+3. Configure an `onBeforeScript` in the setting `Sitegeist.Monocle.BackstopJS.configurationTemplate.onBeforeScript` 
+   see https://github.com/garris/BackstopJS#running-custom-scripts that ensures that responsive images have been loaded.
+        
+### Cross platform rendering inconsistencies
 
 Since the rendering especially of fonts has slight deviations between different operation systems it is important
 to run the tests always in a very similar environment to avoid false errors. BackstopJS come with a `--docker` option
@@ -115,10 +160,11 @@ _If the `--docker` option is used make sure to call the `./flow backstop:configu
 reolved from the docker container like in the example below._
 
 ```
-./flow backstop:configuration --base-uri http://host.docker.internal > backstop.json && backstop test --config=backstop.json --docker
+./flow backstop:configuration --base-uri http://host.docker.internal:8081 > backstop.json && backstop test --config=backstop.json --docker
 ```
 
 - When using ./flow server run use http instead of https
+- The backstop docker-container will likely not know about local hostname to generate the backstiothe http-port of the development nginx container 
 
 ## Contribution
 

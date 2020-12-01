@@ -66,11 +66,12 @@ class BackstopCommandController extends CommandController
      *
      * @param string|null $baseUri the base uri, if empty `http://127.0.0.1:8081` is assumed
      * @param string|null $packageKey the site-package, if empty the default site package is used
+     * @param string|null $report the reports to generate seperated by comma, possible keys are 'browser', 'CI' and 'json'
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
      * @throws \Neos\Neos\Domain\Exception
      */
-    public function configurationCommand(?string $baseUri = 'http://127.0.0.1:8081', ?string $packageKey = null) {
+    public function configurationCommand(string $baseUri = 'http://127.0.0.1:8081', ?string $packageKey = null, ?string $report = null) {
         $this->prepareUriBuilder($baseUri);
 
         $sitePackageKey = $packageKey ?: $this->getDefaultSitePackageKey();
@@ -109,6 +110,9 @@ class BackstopCommandController extends CommandController
         $backstopJsConfiguration['id'] = str_replace('.', '_', $sitePackageKey);
         $backstopJsConfiguration['scenarios'] = $scenarioConfigurations;
         $backstopJsConfiguration['viewports'] = $viewportConfigurations;
+        if ($report) {
+            $backstopJsConfiguration['report'] = explode(',', $report);
+        }
 
         $this->outputLine(json_encode($backstopJsConfiguration, JSON_PRETTY_PRINT));
     }
