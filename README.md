@@ -1,8 +1,9 @@
 # Sitegeist.Monocle.BackstopJS
 [BackstopJS](https://garris.github.io/BackstopJS) connector for the Sitegeist.Monocle Styleguide
 
-This packahe can create a BackstopJS configuration file for a whole Monocle styleguide to test all prototypes with all 
-propSets as scenarios in all viewports. The generated configuration and scenarios can be adjusted via setting. 
+This package implements the command `./flow backstop:Configuration` to create a BackstopJS configuration file for 
+a whole Monocle styleguide to test all prototypes with all propSets in all viewports. The generated configuration 
+and scenarios can be adjusted via package setting or via `@styleguide.options.backstop`. 
 
 ### Authors & Sponsors
 
