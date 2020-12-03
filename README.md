@@ -23,7 +23,7 @@ We use semantic-versioning so every breaking change will increase the major-vers
 1. Install BackstopJS: `npm install -g backstopjs` or install BackstopJS as dev depencency of your project
 2. Sitegeist.Monocle.BackstopJS: `composer require sitegeist/monocle-backstopjs`
 2. Create BackstopJS Configuration: `./flow backstop:configuration --package-key Vendor.Site  --base-uri http://127.0.0.1:8081 > custom-backstop.json` 
-3. Start Flow webserver: `./flow server:run`
+3. Start Flow Webserver: `FLOW_CONTEXT Development/VisualRegressionTesting ./flow server:run`
 4. Create Reference Files: `backstop reference --config=custom-backstop.json`
 5. Run Test: `backstop test --config=custom-backstop.json`
 
@@ -113,36 +113,32 @@ the generated scenario.
 If the images in the project use lazy loading it is quite likely that the images are not reliably loaded before the 
 screenshot ist taken. This can be mitigated with by disabling the lazy loading in the styleguide. 
 
-```
-//
-// Set a context variable to detect the styleguide rendering 
-//
-prototype(Sitegeist.Monocle:Preview.Page) {
-    @context.disableLazyloadingInStyleguide = true
-}
+The following fusion code that will disable layzyloading for `Sitegeist.Kaleidoscope` and `Sitegeist.Lazybones`
+is included via FlowContext `Development/VisualRegressionTesting`.
 
+```
 //
 // Disable lazy loading via loading="lazy" from Sitegeist.Kaleidoscope
 //
 prototype(Sitegeist.Kaleidoscope:Image) {
-    loading.@process.loading = ${disableLazyloadingInStyleguide ? 'eager' : value}
+    loading.@process.override = 'eager'
 }
 prototype(Sitegeist.Kaleidoscope:Picture) {
-    loading.@process.override = ${disableLazyloadingInStyleguide ? 'eager' : value}
+    loading.@process.override = 'eager'
 }
 
 //
 // Disable lazy loading via lazysizes.js from Sitegeist.Lazybones
 // 
 prototype(Sitegeist.Lazybones:Image) {
-    lazy.@process.override = ${disableLazyloadingInStyleguide ? false : value}
+    lazy.@process.override = false
 }
 prototype(Sitegeist.Lazybones:Picture) {
-    lazy.@process.override = ${disableLazyloadingInStyleguide ? false : value}
+    lazy.@process.override = false
 }
 ```
+!!! Do not include this code in the regular fusion code for Deveopment or Production !!!
 
-!!! We recommend to include this only in the Development Context to avoid interference with production code!!! 
 
 Alternatively you can also use the following options:
 
