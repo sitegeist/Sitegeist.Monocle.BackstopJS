@@ -4,18 +4,18 @@
 // Disable lazy loading via loading="lazy" from Sitegeist.Kaleidoscope
 //
 prototype(Sitegeist.Kaleidoscope:Image) {
-    loading.@process.override = 'eager'
+    loading.@process.override = ${'eager'}
 }
 prototype(Sitegeist.Kaleidoscope:Picture) {
-    loading.@process.override = 'eager'
+    loading.@process.override = ${'eager'}
 }
 
 //
 // Disable lazy loading via lazysizes.js from Sitegeist.Lazybones
 //
 prototype(Sitegeist.Lazybones:Image) {
-    lazy.@process.override = false
+    lazy.@process.override = ${false}
 }
 prototype(Sitegeist.Lazybones:Picture) {
-    lazy.@process.override = false
+    lazy.@process.override = ${false}
 }
