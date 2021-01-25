@@ -78,6 +78,23 @@ class BackstopCommandController extends CommandController
         $fusionAst = $this->fusionService->getMergedFusionObjectTreeForSitePackage($sitePackageKey);
         $styleguideObjects = $this->fusionService->getStyleguideObjectsFromFusionAst($fusionAst);
 
+        $hiddenPrototypeNamePatterns = $this->configurationService->getSiteConfiguration($sitePackageKey, 'hiddenPrototypeNamePatterns');
+        if (is_array($hiddenPrototypeNamePatterns)) {
+            $alwaysShowPrototypes = $this->configurationService->getSiteConfiguration($sitePackageKey, 'alwaysShowPrototypes');
+            foreach ($hiddenPrototypeNamePatterns as $pattern) {
+                $styleguideObjects = array_filter(
+                    $styleguideObjects,
+                    function ($prototypeName) use ($pattern, $alwaysShowPrototypes) {
+                        if (in_array($prototypeName, $alwaysShowPrototypes, true)) {
+                            return true;
+                        }
+                        return fnmatch($pattern, $prototypeName) === false;
+                    },
+                    ARRAY_FILTER_USE_KEY
+                );
+            }
+        }
+
         $scenarioConfigurations = [];
         foreach ($styleguideObjects as $prototypeName => $styleguideInformations) {
             $enableDefault = $styleguideInformations['options']['backstop']['default'] ?? !$this->defaultOptIn;
