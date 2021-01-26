@@ -74,6 +74,23 @@ Sitegeist:
       scenarioTemplate: ...     
 ```
 
+All settings can be overwritten for each site-package to adjust to multi site environments
+
+```yaml
+Sitegeist:
+  Monocle:
+    packages:
+      'Vendor.Site':
+        BackstopJS:
+          configurationTemplate:
+            paths:
+              bitmaps_reference: 'DistributionPackages/Vendor.Site/Test/BackstopJS/References'
+              engine_scripts: 'DistributionPackages/Vendor.Site/Test/BackstopJS/EngineScripts'
+              bitmaps_test: 'Data/Temporary/BackstopJS/Vendor.Site/Test'
+              html_report: 'Data/Temporary/BackstopJS/Vendor.Site/HtmlReport'
+              ci_report: 'Data/Temporary/BackstopJS/Vendor.Site/CiReport'
+```
+
 Prototype.fusion:
 ```
 prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
@@ -103,8 +120,8 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
 
 BackstopJS offers quite a bit of settings to adjust specific scenarios which is documented here https://github.com/garris/BackstopJS#advanced-scenarios. 
 While the general scenario template can be adjusted via Settings.yaml the scenario configuration of each prototyoe can
-be adjusted by the fusion  annotations `@styleguide.options.backstop.scenario`. All keys define here there will override 
-the generated scenario.   
+be adjusted by the fusion  annotations `@styleguide.options.backstop.scenario`. All keys defined here there will override 
+the generated scenario.
 
 ## Common problems and solutions 
 

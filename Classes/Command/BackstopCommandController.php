@@ -38,30 +38,6 @@ class BackstopCommandController extends CommandController
     protected $uriBuilder;
 
     /**
-     * @Flow\InjectConfiguration(path="configurationTemplate")
-     * @var array
-     */
-    protected $configurationTemplate;
-
-    /**
-     * @Flow\InjectConfiguration(path="scenarioTemplate")
-     * @var array
-     */
-    protected $scenarioTemplate;
-
-    /**
-     * @Flow\InjectConfiguration(path="defaultOptIn")
-     * @var bool
-     */
-    protected $defaultOptIn;
-
-    /**
-     * @Flow\InjectConfiguration(path="propSetOptIn")
-     * @var bool
-     */
-    protected $propSetOptIn;
-
-    /**
      * Generate a backstopJS configuration file for the given site-package and baseUri
      *
      * @param string|null $baseUri the base uri, if empty `http://127.0.0.1:8081` is assumed
@@ -78,6 +54,14 @@ class BackstopCommandController extends CommandController
         $fusionAst = $this->fusionService->getMergedFusionObjectTreeForSitePackage($sitePackageKey);
         $styleguideObjects = $this->fusionService->getStyleguideObjectsFromFusionAst($fusionAst);
 
+        // read configuration and respect package-based overrides
+        $configurationTemplate = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.configurationTemplate');
+        $scenarioTemplate = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.scenarioTemplate');
+        $defaultOptIn = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.defaultOptIn');
+        $propSetOptIn = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.propSetOptIn');
+
+        // apply 'hiddenPrototypeNamePatterns'
+        // @todo this should become part of the monocle "getStyleguideObjectsFromFusionAst" method
         $hiddenPrototypeNamePatterns = $this->configurationService->getSiteConfiguration($sitePackageKey, 'hiddenPrototypeNamePatterns');
         if (is_array($hiddenPrototypeNamePatterns)) {
             $alwaysShowPrototypes = $this->configurationService->getSiteConfiguration($sitePackageKey, 'alwaysShowPrototypes');
@@ -97,14 +81,14 @@ class BackstopCommandController extends CommandController
 
         $scenarioConfigurations = [];
         foreach ($styleguideObjects as $prototypeName => $styleguideInformations) {
-            $enableDefault = $styleguideInformations['options']['backstop']['default'] ?? !$this->defaultOptIn;
-            $enablePropSets = $styleguideInformations['options']['backstop']['propSets'] ?? !$this->propSetOptIn;
+            $enableDefault = $styleguideInformations['options']['backstop']['default'] ?? !$defaultOptIn;
+            $enablePropSets = $styleguideInformations['options']['backstop']['propSets'] ?? !$propSetOptIn;
             if ($enableDefault) {
-                $scenarioConfigurations[] = $this->prepareScenario($sitePackageKey, $prototypeName, $styleguideInformations);
+                $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations);
             }
             if ($styleguideInformations['propSets'] && $enablePropSets) {
                 foreach ($styleguideInformations['propSets'] as $propSet) {
-                    $scenarioConfigurations[] = $this->prepareScenario($sitePackageKey, $prototypeName, $styleguideInformations, $propSet);
+                    $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, $propSet);
                 }
             }
         }
@@ -123,7 +107,7 @@ class BackstopCommandController extends CommandController
 
         }
 
-        $backstopJsConfiguration = $this->configurationTemplate;
+        $backstopJsConfiguration = $configurationTemplate;
         $backstopJsConfiguration['id'] = str_replace('.', '_', $sitePackageKey);
         $backstopJsConfiguration['scenarios'] = $scenarioConfigurations;
         $backstopJsConfiguration['viewports'] = $viewportConfigurations;
@@ -152,6 +136,7 @@ class BackstopCommandController extends CommandController
     }
 
     /**
+     * @param array $scenarioTemplate
      * @param string|null $sitePackageKey
      * @param string $prototypeName
      * @param array $styleguideInformations
@@ -160,9 +145,9 @@ class BackstopCommandController extends CommandController
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
      */
-    protected function prepareScenario(?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null): array
+    protected function prepareScenario(array $scenarioTemplate, ?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null): array
     {
-        $propSetScenario = $this->scenarioTemplate;
+        $propSetScenario = $scenarioTemplate;
         $label = $prototypeName . ($propSet ? ':' . $propSet : '' );
         $propSetScenario['label'] = str_replace(['.', ':'], '_', $label);
         $propSetScenario['url'] = $this->uriBuilder->uriFor(
