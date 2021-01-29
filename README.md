@@ -23,7 +23,7 @@ We use semantic-versioning so every breaking change will increase the major-vers
 1. Install BackstopJS: `npm install -g backstopjs` or install BackstopJS as dev depencency of your project
 2. Sitegeist.Monocle.BackstopJS: `composer require sitegeist/monocle-backstopjs`
 2. Create BackstopJS Configuration: `./flow backstop:configuration --package-key Vendor.Site  --base-uri http://127.0.0.1:8081 > custom-backstop.json` 
-3. Start Flow Webserver: `FLOW_CONTEXT Development/VisualRegressionTesting ./flow server:run`
+3. Start Flow Webserver: `FLOW_CONTEXT=Development/VisualRegressionTesting ./flow server:run`
 4. Create Reference Files: `backstop reference --config=custom-backstop.json`
 5. Run Test: `backstop test --config=custom-backstop.json`
 
