@@ -59,6 +59,7 @@ class BackstopCommandController extends CommandController
         $scenarioTemplate = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.scenarioTemplate');
         $defaultOptIn = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.defaultOptIn');
         $propSetOptIn = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.propSetOptIn');
+        $useCaseOptIn = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.useCaseOptIn');
 
         // apply 'hiddenPrototypeNamePatterns'
         // @todo this should become part of the monocle "getStyleguideObjectsFromFusionAst" method
@@ -83,12 +84,18 @@ class BackstopCommandController extends CommandController
         foreach ($styleguideObjects as $prototypeName => $styleguideInformations) {
             $enableDefault = $styleguideInformations['options']['backstop']['default'] ?? !$defaultOptIn;
             $enablePropSets = $styleguideInformations['options']['backstop']['propSets'] ?? !$propSetOptIn;
+            $enableUseCases = $styleguideInformations['options']['backstop']['useCases'] ?? !$useCaseOptIn;
             if ($enableDefault) {
                 $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations);
             }
             if ($styleguideInformations['propSets'] && $enablePropSets) {
                 foreach ($styleguideInformations['propSets'] as $propSet) {
                     $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, $propSet);
+                }
+            }
+            if ($styleguideInformations['useCases'] && $enableUseCases) {
+                foreach ($styleguideInformations['useCases'] as $useCaseConfiguration) {
+                    $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, null, $useCaseConfiguration['name']);
                 }
             }
         }
@@ -140,22 +147,24 @@ class BackstopCommandController extends CommandController
      * @param string|null $sitePackageKey
      * @param string $prototypeName
      * @param array $styleguideInformations
-     * @param string $propSet
+     * @param string|null $propSet
+     * @param string|null $useCase
      * @return array
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
      */
-    protected function prepareScenario(array $scenarioTemplate, ?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null): array
+    protected function prepareScenario(array $scenarioTemplate, ?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null, ?string $useCase = null): array
     {
         $propSetScenario = $scenarioTemplate;
-        $label = $prototypeName . ($propSet ? ':' . $propSet : '' );
+        $label = $prototypeName . ($propSet ? ':' . $propSet : '') . ($useCase ? ':' . $useCase : '');
         $propSetScenario['label'] = str_replace(['.', ':'], '_', $label);
         $propSetScenario['url'] = $this->uriBuilder->uriFor(
             'index',
             [
                 'sitePackageKey' => $sitePackageKey,
                 'prototypeName' => $prototypeName,
-                'propSet' => $propSet
+                'propSet' => $propSet,
+                'useCase' => $useCase
             ],
             'preview',
             'Sitegeist.Monocle'
