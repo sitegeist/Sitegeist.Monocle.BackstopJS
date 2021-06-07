@@ -61,6 +61,10 @@ Sitegeist:
       # will be included, by default all propSets from the styleguide are included
       propSetOptIn: false
 
+      # if enabled only useCases from prototypes that have @styleguide.options.backstop.useCases = true
+      # will be included, by default all useCases from the styleguide are included
+      useCaseOptIn: false
+
       # template for the generated backstop.json file
       # the keys 'id','viewports','scenarios' and 'pathes' are
       # replaced by the backstop:configuration command
@@ -106,6 +110,10 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
                 # depends on `propSetOptIn` settings   
                 propSets = true
 
+                # enable or disable the useCases inclusion, the default
+                # depends on `useCaseOptIn` settings   
+                useCases = true
+                
                 # configure scenario settings 
                 scenario {
                   delay = 2000

@@ -6,7 +6,7 @@
     "require": {
         "neos/neos": "~5.0 || ~7.0 || dev-master",
         "neos/fusion": "~5.0 || ~7.0 || dev-master",
-        "sitegeist/monocle": "~7.2 || dev-master",
+        "sitegeist/monocle": "~7.4 || dev-master",
         "neos/utility-arrays": "*"
     },
     "autoload": {
