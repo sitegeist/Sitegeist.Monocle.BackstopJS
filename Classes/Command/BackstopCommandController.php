@@ -145,7 +145,6 @@ class BackstopCommandController extends CommandController
         $numTests = 0;
         $numFailure = 0;
         $numError = 0;
-        $numSkiped = 0;
 
         foreach ($report['tests'] as $part) {
             $numTests ++;
@@ -154,16 +153,14 @@ class BackstopCommandController extends CommandController
             $testcase->addAttribute('name', $part['pair']['viewportLabel']);
             if ($part['status'] == "fail") {
                 $numFailure ++;
-                $referencePath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['reference']));
-                $resultPath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['test']));
+                // $referencePath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['reference']));
+                // $resultPath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['test']));
                 $differencePath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['diffImage']));
                 $testcase->addChild(
                     'system-out',
-                    'Result: [[ATTACHMENT|' . $resultPath . ']]' .
-                    'Expectation: [[ATTACHMENT|' . $referencePath . ']]' .
-                    'Difference: [[ATTACHMENT|' . $differencePath . ']]'
-
+                    '[[ATTACHMENT|' . $differencePath . ']]'
                 );
+                $testcase->addChild('failure', "Design deviation: " . $part['pair']['label'] . ' - ' . $part['pair']['viewportLabel']);
             }
         }
 
@@ -171,7 +168,6 @@ class BackstopCommandController extends CommandController
         $testsuite->addAttribute('tests', (string)$numTests);
         $testsuite->addAttribute('failures', (string)$numFailure);
         $testsuite->addAttribute('errors', (string)$numError);
-        $testsuite->addAttribute('skipped', (string)$numSkiped);
 
         $this->output($testsuites->asXML());
     }
