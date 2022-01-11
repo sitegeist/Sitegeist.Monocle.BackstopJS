@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Sitegeist\Monocle\BackstopJS\Command;
 
+use Neos\Flow\Annotations as Flow;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 use Neos\Flow\Mvc\ActionRequest;
 use Sitegeist\Monocle\Service\DummyControllerContextTrait;
@@ -14,6 +14,7 @@ use Sitegeist\Monocle\Fusion\FusionService;
 use Sitegeist\Monocle\Service\ConfigurationService;
 use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Utility\Arrays;
+use SimpleXMLElement;
 
 class BackstopCommandController extends CommandController
 {
@@ -123,6 +124,56 @@ class BackstopCommandController extends CommandController
         }
 
         $this->outputLine(json_encode($backstopJsConfiguration, JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * Convert a json report to junit format for using in gitlab ci
+     *
+     * @param string $reportFile The json report to convert
+     * @return void
+     */
+    public function convertJsonReportToXmlCommand( string $reportFile)
+    {
+        $cwd = getcwd();
+        $path = dirname($reportFile);
+        $report = json_decode(file_get_contents($reportFile), true);
+
+        $testsuites = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><testsuites></testsuites>');
+
+        $testsuite = $testsuites->addChild('testsuite');
+
+        $numTests = 0;
+        $numFailure = 0;
+        $numError = 0;
+        $numSkiped = 0;
+
+        foreach ($report['tests'] as $part) {
+            $numTests ++;
+            $testcase = $testsuite->addChild('testcase');
+            $testcase->addAttribute('classname', $part['pair']['label']);
+            $testcase->addAttribute('name', $part['pair']['viewportLabel']);
+            if ($part['status'] == "fail") {
+                $numFailure ++;
+                $referencePath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['reference']));
+                $resultPath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['test']));
+                $differencePath = str_replace($cwd, '', realpath($path . '/' . $part['pair']['diffImage']));
+                $testcase->addChild(
+                    'system-out',
+                    'Result: [[ATTACHMENT|' . $resultPath . ']]' .
+                    'Expectation: [[ATTACHMENT|' . $referencePath . ']]' .
+                    'Difference: [[ATTACHMENT|' . $differencePath . ']]'
+
+                );
+            }
+        }
+
+        $testsuite->addAttribute('name', $report['testSuite']);
+        $testsuite->addAttribute('tests', (string)$numTests);
+        $testsuite->addAttribute('failures', (string)$numFailure);
+        $testsuite->addAttribute('errors', (string)$numError);
+        $testsuite->addAttribute('skipped', (string)$numSkiped);
+
+        $this->output($testsuites->asXML());
     }
 
     /**

@@ -27,7 +27,7 @@ Sitegeist:
         # Viewport configuration, created from the configured monocle viewports
         viewports: null
         # Reports to generate, replaced by the --report cli argument
-        report: null
+        report: ['html','json']
         # The pathes are adjusted for flow, references and engine scripts are in
         # Test/BackstopJS which should be under version control  while results
         # and reports are only temporary
