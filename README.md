@@ -127,9 +127,49 @@ prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
 ### Advanced scenarios 
 
 BackstopJS offers quite a bit of settings to adjust specific scenarios which is documented here https://github.com/garris/BackstopJS#advanced-scenarios. 
-While the general scenario template can be adjusted via Settings.yaml the scenario configuration of each prototyoe can
-be adjusted by the fusion  annotations `@styleguide.options.backstop.scenario`. All keys defined here there will override 
+While the general scenario template can be adjusted via Settings.yaml the scenario configuration of each prototype can
+be adjusted by the fusion  annotations `@styleguide.options.backstop.scenario`. All keys defined there will override 
 the generated scenario.
+
+### Advanced viewports
+
+Each scenario can rely on its own set of viewports which are sourced from settings in the following order:
+
+1. `@styleguide.options.backstop.scenario.viewports`
+2. `Sitegeist.Monocle.BackstopJS.scenarioTemplate.viewports` via `Settings.yaml`
+3. `Sitegeist.Monocle.ui.viewportPresets` via `Settings.yaml`
+
+This example demonstrates using a predefined viewport from the default settings of `Sitegeist.Monocle` alongside a 
+custom defined viewport.
+
+```
+prototype(Vendor.Site:Component) < prototype(Neos.Fusion:Component) {
+  @styleguide.options.backstop.scenario.viewports {
+    md = true
+    custom {
+      label = "custom"
+      width = 375
+      height = 112
+    }
+  }
+}
+```
+
+You can also define viewports only as presets with `enabled: false` inside the `scenarioTemplate` setting.
+```yaml
+Sitegeist:
+  Monocle:
+    packages:
+      'Vendor.Site':
+        BackstopJS:
+          scenarioTemplate:
+            viewports:
+              auto:
+                enabled: false
+                label: auto
+                width: 1
+                height: 1
+```
 
 ## Common problems and solutions 
 
