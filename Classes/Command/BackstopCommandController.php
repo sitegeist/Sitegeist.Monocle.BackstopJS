@@ -218,6 +218,41 @@ class BackstopCommandController extends CommandController
         );
 
         $scenarioConfiguration = $styleguideInformations['options']['backstop']['scenario'] ?? null;
+        if ($scenarioViewports = $scenarioConfiguration['viewports'] ?? $propSetScenario['viewports']) {
+            $viewportPresets = $this->configurationService->getSiteConfiguration($sitePackageKey, 'ui.viewportPresets');
+
+            if (is_array($scenarioConfiguration) && array_key_exists('viewports', $scenarioConfiguration)) {
+                $viewportPresets = Arrays::arrayMergeRecursiveOverrule($viewportPresets, $propSetScenario['viewports']);
+            } else {
+                $scenarioViewports = array_filter($scenarioViewports, static function ($viewport) {
+                    return $viewport['enabled'] ?? true;
+                });
+            }
+
+            $viewportConfigurations = [];
+            foreach ($scenarioViewports as $viewportName => $viewportConfiguration) {
+                if ($viewportConfiguration === true && array_key_exists($viewportName, $viewportPresets)) {
+                    $viewportConfiguration = $viewportPresets[$viewportName];
+                }
+
+                if (!is_array($viewportConfiguration)) {
+                    continue;
+                }
+
+                if ($viewportConfiguration['width'] && $viewportConfiguration['height']) {
+                    $viewport = [
+                        'label' => $viewportConfiguration['label'],
+                        'width' => $viewportConfiguration['width'],
+                        'height' => $viewportConfiguration['height']
+                    ];
+                    $viewportConfigurations[] = $viewport;
+                }
+            }
+
+            $scenarioConfiguration['viewports'] = $viewportConfigurations;
+            unset($propSetScenario['viewports']);
+        }
+
         if ($scenarioConfiguration && is_array($scenarioConfiguration)) {
             $propSetScenario = Arrays::arrayMergeRecursiveOverrule($propSetScenario, $scenarioConfiguration);
         }
