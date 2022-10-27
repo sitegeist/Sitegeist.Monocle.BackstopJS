@@ -40,21 +40,22 @@ class BackstopCommandController extends CommandController
     /**
      * Generate a backstopJS configuration file for the given site-package and baseUri
      *
-     * @param string|null $baseUri the base uri, if empty `http://127.0.0.1:8081` is assumed
+     * @param string|null $baseUri the base uri, if empty the configured baseUri from settings is used
      * @param string|null $packageKey the site-package, if empty the default site package is used
      * @param string|null $report the reports to generate seperated by comma, possible keys are 'browser', 'CI' and 'json'
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
      * @throws \Neos\Neos\Domain\Exception
      */
-    public function configurationCommand(string $baseUri = 'http://127.0.0.1:8081', ?string $packageKey = null, ?string $report = null) {
-        $this->prepareUriBuilder($baseUri);
+    public function configurationCommand(string $baseUri = null, ?string $packageKey = null, ?string $report = null) {
+        $this->prepareUriBuilder();
 
         $sitePackageKey = $packageKey ?: $this->getDefaultSitePackageKey();
         $fusionAst = $this->fusionService->getMergedFusionObjectTreeForSitePackage($sitePackageKey);
         $styleguideObjects = $this->fusionService->getStyleguideObjectsFromFusionAst($fusionAst);
 
         // read configuration and respect package-based overrides
+        $baseUri = $baseUri ?: $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.baseUri');
         $configurationTemplate = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.configurationTemplate');
         $scenarioTemplate = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.scenarioTemplate');
         $defaultOptIn = $this->configurationService->getSiteConfiguration($sitePackageKey, 'BackstopJS.defaultOptIn');
@@ -86,16 +87,16 @@ class BackstopCommandController extends CommandController
             $enablePropSets = $styleguideInformations['options']['backstop']['propSets'] ?? !$propSetOptIn;
             $enableUseCases = $styleguideInformations['options']['backstop']['useCases'] ?? !$useCaseOptIn;
             if ($enableDefault) {
-                $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations);
+                $scenarioConfigurations[] = $this->prepareScenario($baseUri, $scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations);
             }
             if ($styleguideInformations['propSets'] && $enablePropSets) {
                 foreach ($styleguideInformations['propSets'] as $propSet) {
-                    $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, $propSet);
+                    $scenarioConfigurations[] = $this->prepareScenario($baseUri, $scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, $propSet);
                 }
             }
             if ($styleguideInformations['useCases'] && $enableUseCases) {
                 foreach ($styleguideInformations['useCases'] as $useCaseConfiguration) {
-                    $scenarioConfigurations[] = $this->prepareScenario($scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, null, $useCaseConfiguration['name']);
+                    $scenarioConfigurations[] = $this->prepareScenario($baseUri, $scenarioTemplate, $sitePackageKey, $prototypeName, $styleguideInformations, null, $useCaseConfiguration['name']);
                 }
             }
         }
@@ -103,7 +104,7 @@ class BackstopCommandController extends CommandController
         $viewportPresets = $this->configurationService->getSiteConfiguration($sitePackageKey, 'ui.viewportPresets');
         $viewportConfigurations = [];
         foreach ($viewportPresets as $viewportName => $viewportConfiguration) {
-            if ($viewportConfiguration['width'] && $viewportConfiguration['height']) {
+            if ($viewportConfiguration && $viewportConfiguration['width'] && $viewportConfiguration['height']) {
                 $viewport = [
                     'label' => $viewportConfiguration['label'],
                     'width' => $viewportConfiguration['width'],
@@ -128,10 +129,10 @@ class BackstopCommandController extends CommandController
     /**
      * @param string $baseUri
      */
-    protected function prepareUriBuilder(string $baseUri): void
+    protected function prepareUriBuilder(): void
     {
         // mock action request and enable rewriteurl to render
-        $httpRequest = new ServerRequest('get', new Uri($baseUri));
+        $httpRequest = new ServerRequest('get', new Uri(""));
         $actionRequest = ActionRequest::fromHttpRequest($httpRequest);
         putenv('FLOW_REWRITEURLS=1');
 
@@ -143,6 +144,7 @@ class BackstopCommandController extends CommandController
     }
 
     /**
+     * @param string $baseUri
      * @param array $scenarioTemplate
      * @param string|null $sitePackageKey
      * @param string $prototypeName
@@ -153,12 +155,12 @@ class BackstopCommandController extends CommandController
      * @throws \Neos\Flow\Http\Exception
      * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
      */
-    protected function prepareScenario(array $scenarioTemplate, ?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null, ?string $useCase = null): array
+    protected function prepareScenario(string $baseUri, array $scenarioTemplate, ?string $sitePackageKey, string $prototypeName, array $styleguideInformations, ?string $propSet = null, ?string $useCase = null): array
     {
         $propSetScenario = $scenarioTemplate;
         $label = $prototypeName . ($propSet ? ':' . $propSet : '') . ($useCase ? ':' . $useCase : '');
         $propSetScenario['label'] = str_replace(['.', ':'], '_', $label);
-        $propSetScenario['url'] = $this->uriBuilder->uriFor(
+        $propSetScenario['url'] = $baseUri . $this->uriBuilder->uriFor(
             'index',
             [
                 'sitePackageKey' => $sitePackageKey,
