@@ -2,6 +2,9 @@ Sitegeist:
   Monocle:
     BackstopJS:
 
+      # The base uri that is usen when none is specified in the command
+      baseUri: 'http://127.0.0.1:8081'
+
       # if enabled only prototypes that have @styleguide.options.backstop.default = true will
       # be included, by default all prototypes from the styleguide are included
       defaultOptIn: false
